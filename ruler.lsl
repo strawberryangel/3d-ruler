@@ -1,4 +1,4 @@
-float TIMER_INTERVAL = 2.0;
+float TIMER_INTERVAL = 0.5;
 vector last_position;
 
 vector get_size()
@@ -8,26 +8,37 @@ vector get_size()
 	return size;
 }
 
-// This makes it easier to copy/paste values, 
+vector size;
+vector position;
+vector corner1;
+vector corner2;
+calculate()
+{
+	size = get_size();
+	position = llGetPos();
+
+    corner1 = <position.x - size.x/2, position.y - size.y/2, position.z - size.z/2>;
+    corner2 = <position.x + size.x/2, position.y + size.y/2, position.z + size.z/2>;
+}
+
+// This makes it easier to copy/paste values,
 // rather than copying them manually by hand.
 spew_to_local()
 {
-		vector size = get_size();
-		vector position = llGetPos();
 		llOwnerSay("Size: " + (string)size);
-		llOwnerSay("X: " + (string)(position.x - size.x/2) + " to " + (string)(position.x + size.x/2));
-		llOwnerSay("Y: " + (string)(position.y - size.y/2) + " to " + (string)(position.y + size.y/2));
-		llOwnerSay("Z: " + (string)(position.z - size.z/2) + " to " + (string)(position.z + size.z/2));
+		llOwnerSay("X: " + (string)(corner1.x) + " to " + (string)(corner2.x));
+		llOwnerSay("Y: " + (string)(corner1.y) + " to " + (string)(corner2.y));
+		llOwnerSay("Z: " + (string)(corner1.z) + " to " + (string)(corner2.z));
+		llOwnerSay(" \n");
+		llOwnerSay("Corners: " + string(corner1) + " to " + string(corner2));
 }
 
 update_text()
 {
-	vector size = get_size();
-	vector position = llGetPos();
 	string text = "Size: " + (string)size + "\n" +
-		"X: " + (string)(position.x - size.x/2) + " to " + (string)(position.x + size.x/2) + "\n" +
-		"Y: " + (string)(position.y - size.y/2) + " to " + (string)(position.y + size.y/2) + "\n" +
-		"Z: " + (string)(position.z - size.z/2) + " to " + (string)(position.z + size.z/2);
+		"X: " + (string)(corner1.x) + " to " + (string)(corner2.x) + "\n" +
+		"Y: " + (string)(corner1.y) + " to " + (string)(corner2.y) + "\n" +
+		"Z: " + (string)(corner1.z) + " to " + (string)(corner2.z);
 
 	llSetText(text, <0, 1, 0>, 1);
 }
@@ -36,26 +47,29 @@ default
 {
 	changed(integer change)
 	{
+        calculate();
 		update_text();
 	}
 
 	state_entry()
 	{
 		llSetTimerEvent(TIMER_INTERVAL);
+        calculate();
 		update_text();
 	}
-	
+
 	timer()
 	{
-		vector position = llGetPos();
+        calculate();
 		if(position == last_position) return;
-		
+
 		last_position = position;
 		update_text();
 	}
 
 	touch_start(integer total_number)
 	{
+        calculate();
 		spew_to_local();
 	}
 }
